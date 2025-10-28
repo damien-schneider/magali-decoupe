@@ -1,54 +1,58 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Circle } from "@/types/circle-fitter"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { Circle } from "@/types/circle-fitter";
 
-interface CircleConfigurationProps {
-  circles: Circle[]
-  onCirclesChange: (circles: Circle[]) => void
-}
+type CircleConfigurationProps = {
+  circles: Circle[];
+  onCirclesChange: (circles: Circle[]) => void;
+};
 
-export function CircleConfiguration({ circles, onCirclesChange }: CircleConfigurationProps) {
+export function CircleConfiguration({
+  circles,
+  onCirclesChange,
+}: CircleConfigurationProps) {
   const updateCircleDiameter = (index: number, value: string) => {
-    const diameter = Number.parseFloat(value) || 0
-    const newCircles = [...circles]
-    newCircles[index] = { ...newCircles[index], diameter }
-    onCirclesChange(newCircles)
-  }
+    const diameter = Number.parseFloat(value) || 0;
+    const newCircles = [...circles];
+    newCircles[index] = { ...newCircles[index], diameter };
+    onCirclesChange(newCircles);
+  };
 
   return (
-    <Card className="shadow-none border-border/40">
+    <Card className="border-border/40 shadow-none">
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Diamètres des cercles</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2.5">
         {circles.map((circle, index) => (
-          <div key={index} className="flex items-center gap-2.5">
+          // biome-ignore lint/suspicious/noArrayIndexKey: <>
+          <div className="flex items-center gap-2.5" key={index}>
             <div
-              className="w-5 h-5 rounded-full border flex-shrink-0"
+              className="h-5 w-5 shrink-0 rounded-full border"
               style={{
-                backgroundColor: circle.color + "60",
+                backgroundColor: `${circle.color}60`,
                 borderColor: circle.color,
               }}
             />
-            <Label htmlFor={`circle-${index}`} className="min-w-[60px] text-sm">
+            <Label className="min-w-[60px] text-sm" htmlFor={`circle-${index}`}>
               Cercle {index + 1}
             </Label>
             <Input
+              className="h-9 font-mono shadow-none"
               id={`circle-${index}`}
-              type="number"
               min="0.1"
-              step="1"
-              value={circle.diameter}
               onChange={(e) => updateCircleDiameter(index, e.target.value)}
-              className="font-mono h-9 shadow-none"
+              step="1"
+              type="number"
+              value={circle.diameter}
             />
-            <span className="text-sm text-muted-foreground">cm</span>
+            <span className="text-muted-foreground text-sm">cm</span>
           </div>
         ))}
       </CardContent>
     </Card>
-  )
+  );
 }

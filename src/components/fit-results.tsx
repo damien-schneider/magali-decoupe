@@ -1,74 +1,115 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { CheckCircle2, XCircle } from "lucide-react"
-import { FitResult, Circle } from "@/types/circle-fitter"
+import { CheckCircle2, XCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MaxCirclesCanvas } from "@/components/circle-canvas";
+import type { Circle, FitResult, MaxCirclesResult, FabricDimensions } from "@/types/circle-fitter";
 
-interface FitResultsProps {
-  fitResult: FitResult | null
-  circles: Circle[]
-  gap: number
-  onApplySuggestions: (suggestions: Circle[]) => void
-}
+type FitResultsProps = {
+  fitResult: FitResult | null;
+  circles: Circle[];
+  gap: number;
+  onApplySuggestions: (suggestions: Circle[]) => void;
+  showPreview: boolean;
+  maxCirclesResult: MaxCirclesResult | null;
+  dimensions: FabricDimensions;
+};
 
-export function FitResults({ fitResult, circles, gap, onApplySuggestions }: FitResultsProps) {
+export function FitResults({
+  fitResult,
+  circles,
+  gap,
+  onApplySuggestions,
+  showPreview,
+  maxCirclesResult,
+  dimensions,
+}: FitResultsProps) {
   const applySuggestions = () => {
     if (fitResult?.suggestions) {
-      onApplySuggestions(fitResult.suggestions)
+      onApplySuggestions(fitResult.suggestions);
     }
-  }
+  };
 
-  if (!fitResult) return null
+  // Allow the component to render when either fitResult or maxCirclesResult is available
+  if (!fitResult && !maxCirclesResult) {
+    return null;
+  }
 
   return (
     <>
-      <Alert variant={fitResult.fits ? "default" : "destructive"} className="shadow-none border-border/40">
-        <div className="flex items-start gap-2.5">
-          {fitResult.fits ? (
-            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-          ) : (
-            <XCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-          )}
-          <div className="flex-1">
-            <AlertDescription className="text-sm font-medium mb-0.5">
-              {fitResult.fits ? "Tous les cercles rentrent" : "Les cercles ne rentrent pas"}
-            </AlertDescription>
-            <AlertDescription className="text-xs">
-              {fitResult.fits
-                ? `Les quatre cercles rentrent avec ${gap} cm d'espacement.`
-                : `Seulement ${fitResult.circles.length} cercle(s) sur 4 peuvent être placés.`}
-            </AlertDescription>
+      {fitResult && (
+        <Alert
+          className="border-border/40 shadow-none"
+          variant={fitResult.fits ? "default" : "destructive"}
+        >
+          <div className="flex items-start gap-2.5">
+            {fitResult.fits ? (
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+            ) : (
+              <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            )}
+            <div className="flex-1">
+              <AlertDescription className="mb-0.5 font-medium text-sm">
+                {fitResult.fits
+                  ? "Tous les cercles rentrent"
+                  : "Les cercles ne rentrent pas"}
+              </AlertDescription>
+              <AlertDescription className="text-xs">
+                {fitResult.fits
+                  ? `Les quatre cercles rentrent avec ${gap} cm d'espacement.`
+                  : `Seulement ${fitResult.circles.length} cercle(s) sur 4 peuvent être placés.`}
+              </AlertDescription>
+            </div>
           </div>
-        </div>
-      </Alert>
+        </Alert>
+      )}
 
-      {!fitResult.fits && fitResult.suggestions && (
-        <Card className="shadow-none border-border/40">
+      {showPreview && maxCirclesResult && (
+        <div className="flex items-center justify-center rounded bg-muted/30 p-3">
+          <div className="mb-2 text-center font-medium text-green-600 text-sm">
+            Canvas Preview: {maxCirclesResult.totalCount} circles calculated
+          </div>
+          <MaxCirclesCanvas
+            fabricHeight={dimensions.height}
+            fabricWidth={dimensions.width}
+            gap={dimensions.gap}
+            result={maxCirclesResult}
+          />
+        </div>
+      )}
+
+      {fitResult && !fitResult.fits && fitResult.suggestions && (
+        <Card className="border-border/40 shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Tailles suggérées</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2.5">
             {fitResult.suggestions.map((suggestion, index) => (
-              <div key={index} className="flex items-center gap-2.5 text-sm">
+              // biome-ignore lint/suspicious/noArrayIndexKey: <>
+              <div className="flex items-center gap-2.5 text-sm" key={index}>
                 <div
-                  className="w-4 h-4 rounded-full border flex-shrink-0"
+                  className="h-4 w-4 shrink-0 rounded-full border"
                   style={{
-                    backgroundColor: suggestion.color + "60",
+                    backgroundColor: `${suggestion.color}60`,
                     borderColor: suggestion.color,
                   }}
                 />
                 <span className="min-w-[60px]">Cercle {index + 1} :</span>
-                <span className="font-mono font-medium">{suggestion.diameter} cm</span>
+                <span className="font-medium font-mono">
+                  {suggestion.diameter} cm
+                </span>
                 {suggestion.diameter !== circles[index].diameter && (
-                  <span className="text-muted-foreground text-xs">(était {circles[index].diameter})</span>
+                  <span className="text-muted-foreground text-xs">
+                    (était {circles[index].diameter})
+                  </span>
                 )}
               </div>
             ))}
             <Button
+              className="mt-2 h-9 w-full bg-transparent shadow-none"
               onClick={applySuggestions}
-              className="w-full mt-2 h-9 shadow-none bg-transparent"
               variant="outline"
             >
               Appliquer les suggestions
@@ -77,5 +118,5 @@ export function FitResults({ fitResult, circles, gap, onApplySuggestions }: FitR
         </Card>
       )}
     </>
-  )
+  );
 }

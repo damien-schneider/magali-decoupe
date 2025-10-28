@@ -1,8 +1,10 @@
-import { defineConfig } from "vite";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import tailwindcss from '@tailwindcss/vite'
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { reactGrab } from "react-grab/plugins/vite";
+
+import { defineConfig } from "vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,7 +13,7 @@ const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), reactGrab()],
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
@@ -20,7 +22,7 @@ export default defineConfig(async () => ({
   server: {
     port: 1420,
     strictPort: true,
-    host: host || false,
+    host,
     hmr: host
       ? {
           protocol: "ws",

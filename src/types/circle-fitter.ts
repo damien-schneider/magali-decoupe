@@ -1,28 +1,28 @@
-export interface Circle {
-  diameter: number
-  x?: number
-  y?: number
-  color: string
-}
+export type Circle = {
+  diameter: number;
+  x?: number;
+  y?: number;
+  color: string;
+};
 
-export interface FitResult {
-  fits: boolean
-  circles: Circle[]
-  suggestions?: Circle[]
-}
+export type FitResult = {
+  fits: boolean;
+  circles: Circle[];
+  suggestions?: Circle[];
+};
 
-export interface MaxCirclesResult {
-  totalCount: number
+export type MaxCirclesResult = {
+  totalCount: number;
   circlesByType: {
-    diameter: number
-    color: string
-    count: number
-    positions: { x: number; y: number }[]
-  }[]
-}
+    diameter: number;
+    color: string;
+    count: number;
+    positions: { x: number; y: number }[];
+  }[];
+};
 
-export interface FabricDimensions {
-  width: number
-  height: number
-  gap: number
-}
+export type FabricDimensions = {
+  width: number;
+  height: number;
+  gap: number;
+};
