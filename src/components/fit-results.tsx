@@ -1,11 +1,16 @@
 "use client";
 
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, XCircle } from "lucide-react";
+import { MaxCirclesCanvas } from "@/components/circle-canvas";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MaxCirclesCanvas } from "@/components/circle-canvas";
-import type { Circle, FitResult, MaxCirclesResult, FabricDimensions } from "@/types/circle-fitter";
+import type {
+  Circle,
+  FabricDimensions,
+  FitResult,
+  MaxCirclesResult,
+} from "@/types/circle-fitter";
 
 type FitResultsProps = {
   fitResult: FitResult | null;
@@ -33,50 +38,66 @@ export function FitResults({
   };
 
   // Allow the component to render when either fitResult or maxCirclesResult is available
-  if (!fitResult && !maxCirclesResult) {
+  if (!(fitResult || maxCirclesResult)) {
     return null;
   }
 
   return (
     <>
-      {fitResult && (
-        <Alert
-          className="border-border/40 shadow-none"
-          variant={fitResult.fits ? "default" : "destructive"}
-        >
-          <div className="flex items-start gap-2.5">
-            {fitResult.fits ? (
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
-            ) : (
-              <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            )}
-            <div className="flex-1">
-              <AlertDescription className="mb-0.5 font-medium text-sm">
-                {fitResult.fits
-                  ? "Tous les cercles rentrent"
-                  : "Les cercles ne rentrent pas"}
-              </AlertDescription>
-              <AlertDescription className="text-xs">
-                {fitResult.fits
-                  ? `Les quatre cercles rentrent avec ${gap} cm d'espacement.`
-                  : `Seulement ${fitResult.circles.length} cercle(s) sur 4 peuvent être placés.`}
-              </AlertDescription>
-            </div>
+      {fitResult?.timeout && (
+        <Alert className="border-border/40 shadow-none" variant="destructive">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <AlertDescription>
+              Le calcul a pris trop de temps et a été arrêté. Les résultats
+              ci-dessus sont partiels.
+            </AlertDescription>
           </div>
         </Alert>
       )}
 
       {showPreview && maxCirclesResult && (
-        <div className="flex items-center justify-center rounded bg-muted/30 p-3">
-          <div className="mb-2 text-center font-medium text-green-600 text-sm">
+        <div className="space-y-3">
+          {/* Alert title above preview */}
+          {fitResult && (
+            <Alert
+              className="border-border/40 shadow-none"
+              variant={fitResult.fits ? "default" : "destructive"}
+            >
+              {fitResult.fits ? (
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+              ) : (
+                <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              )}
+              <div className="flex-1">
+                <AlertDescription className="mb-0.5 font-medium text-sm">
+                  {fitResult.fits
+                    ? "Tous les cercles rentrent"
+                    : "Les cercles ne rentrent pas"}
+                </AlertDescription>
+                <AlertDescription className="text-xs">
+                  {fitResult.fits
+                    ? `Les quatre cercles rentrent avec ${gap} cm d'espacement.`
+                    : `Seulement ${fitResult.circles.length} cercle(s) sur 4 peuvent être placés.`}
+                </AlertDescription>
+              </div>
+            </Alert>
+          )}
+
+          {/* Canvas Preview text above canvas */}
+          <div className="text-center font-medium text-green-600 text-sm">
             Canvas Preview: {maxCirclesResult.totalCount} circles calculated
           </div>
-          <MaxCirclesCanvas
-            fabricHeight={dimensions.height}
-            fabricWidth={dimensions.width}
-            gap={dimensions.gap}
-            result={maxCirclesResult}
-          />
+
+          {/* Full width canvas */}
+          <div className="w-full rounded bg-muted/30 p-3">
+            <MaxCirclesCanvas
+              fabricHeight={dimensions.height}
+              fabricWidth={dimensions.width}
+              gap={dimensions.gap}
+              result={maxCirclesResult}
+            />
+          </div>
         </div>
       )}
 

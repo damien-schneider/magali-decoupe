@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumberInput } from "@/components/ui/number-input";
 import type { FabricDimensions } from "@/types/circle-fitter";
 
 type FabricDimensionsInputProps = {
@@ -17,21 +17,21 @@ export function FabricDimensionsInput({
   const handleWidthChange = (value: string) => {
     onDimensionsChange({
       ...dimensions,
-      width: Number.parseFloat(value) || 0,
+      width: value === "" ? 0 : Number.parseFloat(value) || 0,
     });
   };
 
   const handleHeightChange = (value: string) => {
     onDimensionsChange({
       ...dimensions,
-      height: Number.parseFloat(value) || 0,
+      height: value === "" ? 0 : Number.parseFloat(value) || 0,
     });
   };
 
   const handleGapChange = (value: string) => {
     onDimensionsChange({
       ...dimensions,
-      gap: Number.parseFloat(value) || 0,
+      gap: value === "" ? 0 : Number.parseFloat(value) || 0,
     });
   };
 
@@ -46,12 +46,11 @@ export function FabricDimensionsInput({
             <Label className="text-sm" htmlFor="width">
               Largeur (cm)
             </Label>
-            <Input
-              className="h-9 font-mono shadow-none"
+            <NumberInput
+              className="font-mono shadow-none"
               id="width"
-              min="1"
+              min={1}
               onChange={(e) => handleWidthChange(e.target.value)}
-              type="number"
               value={dimensions.width}
             />
           </div>
@@ -59,12 +58,11 @@ export function FabricDimensionsInput({
             <Label className="text-sm" htmlFor="height">
               Hauteur (cm)
             </Label>
-            <Input
-              className="h-9 font-mono shadow-none"
+            <NumberInput
+              className="font-mono shadow-none"
               id="height"
-              min="1"
+              min={1}
               onChange={(e) => handleHeightChange(e.target.value)}
-              type="number"
               value={dimensions.height}
             />
           </div>
@@ -73,13 +71,12 @@ export function FabricDimensionsInput({
           <Label className="text-sm" htmlFor="gap">
             Espacement (cm)
           </Label>
-          <Input
-            className="h-9 font-mono shadow-none"
+          <NumberInput
+            className="font-mono shadow-none"
             id="gap"
-            min="0"
+            min={0}
             onChange={(e) => handleGapChange(e.target.value)}
-            step="1"
-            type="number"
+            step={1}
             value={dimensions.gap}
           />
         </div>

@@ -8,6 +8,7 @@ import { MaxCirclesCalculator } from "@/components/max-circles-calculator";
 import type {
   Circle,
   FabricDimensions,
+  FitResult,
   MaxCirclesResult,
 } from "@/types/circle-fitter";
 
@@ -26,6 +27,8 @@ export function FabricCircleFitter() {
   const [maxCirclesResult, setMaxCirclesResult] =
     useState<MaxCirclesResult | null>(null);
   const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [fitResult, setFitResult] = useState<FitResult | null>(null);
+  const [isValidConfiguration, setIsValidConfiguration] = useState<boolean>(true);
 
   const applySuggestions = (suggestions: Circle[]) => {
     setCircles(suggestions);
@@ -46,12 +49,16 @@ export function FabricCircleFitter() {
         onDimensionsChange={setDimensions}
       />
 
-      <CircleConfiguration circles={circles} onCirclesChange={setCircles} />
+      <CircleConfiguration
+        circles={circles}
+        onCirclesChange={setCircles}
+        onValidationChange={setIsValidConfiguration}
+      />
 
       <FitResults
         circles={circles}
         dimensions={dimensions}
-        fitResult={null}
+        fitResult={fitResult}
         gap={dimensions.gap}
         maxCirclesResult={maxCirclesResult}
         onApplySuggestions={applySuggestions}
@@ -61,8 +68,10 @@ export function FabricCircleFitter() {
       <MaxCirclesCalculator
         circles={circles}
         dimensions={dimensions}
+        isValidConfiguration={isValidConfiguration}
         onCalculationComplete={() => setShowPreview(true)}
         onResultChange={setMaxCirclesResult}
+        onFitResultChange={setFitResult}
       />
     </div>
   );

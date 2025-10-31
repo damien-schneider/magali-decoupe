@@ -4,39 +4,110 @@ import type {
   MaxCirclesResult,
 } from "@/types/circle-fitter";
 
+const COMPUTATION_TIMEOUT_MS = 20_000; // 20 seconds timeout
+
+const checkTimeout = (startTime: number): boolean =>
+  Date.now() - startTime > COMPUTATION_TIMEOUT_MS;
+
+type Position = {
+  x: number;
+  y: number;
+};
+
+type PositionSearchParams = {
+  width: number;
+  height: number;
+  radius: number;
+  placedCircles: Circle[];
+  gapSize: number;
+  startTime: number;
+};
+
+const isValidPosition = (
+  params: {
+    x: number;
+    y: number;
+    radius: number;
+    placedCircles: Circle[];
+    gapSize: number;
+  }
+): boolean => {
+  const { x, y, radius, placedCircles, gapSize } = params;
+  
+  for (const other of placedCircles) {
+    if (other.x === undefined || other.y === undefined) {
+      return false;
+    }
+    const dx = x - other.x;
+    const dy = y - other.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const minDistance = radius + other.diameter / 2 + gapSize;
+    if (distance < minDistance - 0.1) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const findPositionForCircle = (
+  params: PositionSearchParams
+): Position | null => {
+  const { width, height, radius, placedCircles, gapSize, startTime } = params;
+
+  for (let x = radius; x <= width - radius; x += 2) {
+    if (checkTimeout(startTime)) {
+      return null;
+    }
+    
+    for (let y = radius; y <= height - radius; y += 2) {
+      if (checkTimeout(startTime)) {
+        return null;
+      }
+      
+      if (isValidPosition({ x, y, radius, placedCircles, gapSize })) {
+        return { x, y };
+      }
+    }
+  }
+  
+  return null;
+};
+
 export const tryFitCircles = (
   width: number,
   height: number,
   circlesToFit: Circle[],
   gapSize: number
 ): FitResult => {
+  const computationStartTime = Date.now();
   const sortedCircles = [...circlesToFit].sort(
     (a, b) => b.diameter - a.diameter
   );
   const placedCircles: Circle[] = [];
 
   for (const circle of sortedCircles) {
-    const radius = circle.diameter / 2;
-    let placed = false;
-
-    for (let x = radius; x <= width - radius && !placed; x += 2) {
-      for (let y = radius; y <= height - radius && !placed; y += 2) {
-        const isValid = placedCircles.every((other) => {
-          const dx = x - other.x!;
-          const dy = y - other.y!;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const minDistance = radius + other.diameter / 2 + gapSize;
-          return distance >= minDistance - 0.1;
-        });
-
-        if (isValid) {
-          placedCircles.push({ ...circle, x, y });
-          placed = true;
-        }
-      }
+    if (checkTimeout(computationStartTime)) {
+      const suggestions = generateSuggestions(width, height, circlesToFit);
+      return {
+        fits: false,
+        circles: placedCircles,
+        suggestions,
+        timeout: true
+      };
     }
 
-    if (!placed) {
+    const position = findPositionForCircle({
+      width,
+      height,
+      radius: circle.diameter / 2,
+      placedCircles,
+      gapSize,
+      startTime: computationStartTime,
+    });
+
+    if (position) {
+      placedCircles.push({ ...circle, ...position });
+    } else {
       const suggestions = generateSuggestions(width, height, circlesToFit);
       return { fits: false, circles: placedCircles, suggestions };
     }
@@ -44,7 +115,6 @@ export const tryFitCircles = (
 
   return { fits: true, circles: placedCircles };
 };
-
 export const generateSuggestions = (
   width: number,
   height: number,
@@ -71,12 +141,73 @@ export const generateSuggestions = (
   }));
 };
 
+const tryPlaceCircle = (
+  params: {
+    width: number;
+    height: number;
+    circle: Circle;
+    placedCircles: { x: number; y: number; diameter: number; color: string }[];
+    gapSize: number;
+    stepSize: number;
+  }
+): boolean => {
+  const { width, height, circle, placedCircles, gapSize, stepSize } = params;
+  const radius = circle.diameter / 2;
+
+  for (let x = radius; x <= width - radius; x += stepSize) {
+    for (let y = radius; y <= height - radius; y += stepSize) {
+      const isValid = placedCircles.every((other) => {
+        const dx = x - other.x;
+        const dy = y - other.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const minDistance = radius + other.diameter / 2 + gapSize;
+        return distance >= minDistance - 0.1;
+      });
+
+      if (isValid) {
+        placedCircles.push({
+          x,
+          y,
+          diameter: circle.diameter,
+          color: circle.color,
+        });
+        return true;
+      }
+    }
+  }
+  
+  return false;
+};
+
+const groupCirclesByType = (
+  params: {
+    sortedCircles: Circle[];
+    placedCircles: { x: number; y: number; diameter: number; color: string }[];
+  }
+): { diameter: number; color: string; count: number; positions: { x: number; y: number }[] }[] => {
+  const { sortedCircles, placedCircles } = params;
+  
+  return sortedCircles.map((circle) => {
+    const positions = placedCircles
+      .filter((p) => p.diameter === circle.diameter)
+      .map((p) => ({ x: p.x, y: p.y }));
+
+    return {
+      diameter: circle.diameter,
+      color: circle.color,
+      count: positions.length,
+      positions,
+    };
+  });
+};
+
 export const calculateMaxCirclesForAll = (
   width: number,
   height: number,
   circlesToFit: Circle[],
   gapSize: number
 ): MaxCirclesResult => {
+  const computationStartTime = Date.now();
   const placedCircles: {
     x: number;
     y: number;
@@ -100,57 +231,36 @@ export const calculateMaxCirclesForAll = (
     consecutiveFailures < maxConsecutiveFailures &&
     circleIndex < maxAttempts
   ) {
-    const currentCircle = sortedCircles[circleIndex % sortedCircles.length];
-    const radius = currentCircle.diameter / 2;
-    let placed = false;
-
-    // Try to find a valid position for this circle
-    for (let x = radius; x <= width - radius && !placed; x += stepSize) {
-      for (let y = radius; y <= height - radius && !placed; y += stepSize) {
-        const isValid = placedCircles.every((other) => {
-          const dx = x - other.x;
-          const dy = y - other.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const minDistance = radius + other.diameter / 2 + gapSize;
-          return distance >= minDistance - 0.1;
-        });
-
-        if (isValid) {
-          placedCircles.push({
-            x,
-            y,
-            diameter: currentCircle.diameter,
-            color: currentCircle.color,
-          });
-          placed = true;
-          consecutiveFailures = 0;
-        }
-      }
+    // Check for timeout
+    if (Date.now() - computationStartTime > COMPUTATION_TIMEOUT_MS) {
+      return {
+        totalCount: placedCircles.length,
+        circlesByType: groupCirclesByType({ sortedCircles, placedCircles }),
+        timeout: true,
+      };
     }
 
-    if (!placed) {
+    const currentCircle = sortedCircles[circleIndex % sortedCircles.length];
+    const placed = tryPlaceCircle({
+      width,
+      height,
+      circle: currentCircle,
+      placedCircles,
+      gapSize,
+      stepSize,
+    });
+
+    if (placed) {
+      consecutiveFailures = 0;
+    } else {
       consecutiveFailures++;
     }
 
     circleIndex++;
   }
 
-  // Group circles by type
-  const circlesByType = sortedCircles.map((circle) => {
-    const positions = placedCircles
-      .filter((p) => p.diameter === circle.diameter)
-      .map((p) => ({ x: p.x, y: p.y }));
-
-    return {
-      diameter: circle.diameter,
-      color: circle.color,
-      count: positions.length,
-      positions,
-    };
-  });
-
   return {
     totalCount: placedCircles.length,
-    circlesByType,
+    circlesByType: groupCirclesByType({ sortedCircles, placedCircles }),
   };
 };

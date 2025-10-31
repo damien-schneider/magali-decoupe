@@ -1,27 +1,33 @@
 "use client";
 
-import { Calculator } from "lucide-react";
+import { Calculator, Clock } from "lucide-react";
 import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type {
   Circle,
   FabricDimensions,
+  FitResult,
   MaxCirclesResult,
 } from "@/types/circle-fitter";
-import { calculateMaxCirclesForAll } from "@/utils/circle-fitting";
+import { calculateMaxCirclesForAll, tryFitCircles } from "@/utils/circle-fitting";
 
 type MaxCirclesCalculatorProps = {
   dimensions: FabricDimensions;
   circles: Circle[];
+  isValidConfiguration: boolean;
   onResultChange: (result: MaxCirclesResult | null) => void;
+  onFitResultChange?: (result: FitResult | null) => void;
   onCalculationComplete?: () => void;
 };
 
 export function MaxCirclesCalculator({
   dimensions,
   circles,
+  isValidConfiguration,
   onResultChange,
+  onFitResultChange,
   onCalculationComplete,
 }: MaxCirclesCalculatorProps) {
   const [isComputingMax, setIsComputingMax] = useState(false);
@@ -32,14 +38,23 @@ export function MaxCirclesCalculator({
     setIsComputingMax(true);
     // Use setTimeout to allow UI to update before heavy computation
     setTimeout(() => {
-      const result = calculateMaxCirclesForAll(
+      // Run both calculations simultaneously
+      const maxResult = calculateMaxCirclesForAll(
         dimensions.width,
         dimensions.height,
         circles,
         dimensions.gap
       );
-      setMaxCirclesResult(result);
-      onResultChange(result);
+      const fitResultValue = tryFitCircles(
+        dimensions.width,
+        dimensions.height,
+        circles,
+        dimensions.gap
+      );
+      
+      setMaxCirclesResult(maxResult);
+      onResultChange(maxResult);
+      onFitResultChange?.(fitResultValue);
       setIsComputingMax(false);
       onCalculationComplete?.();
     }, 50);
@@ -56,7 +71,7 @@ export function MaxCirclesCalculator({
       <CardContent className="space-y-3">
         <Button
           className="h-9 w-full shadow-none"
-          disabled={isComputingMax}
+          disabled={isComputingMax || !isValidConfiguration}
           onClick={computeMaxCircles}
           variant="default"
         >
@@ -64,6 +79,16 @@ export function MaxCirclesCalculator({
         </Button>
         {maxCirclesResult && (
           <>
+            {maxCirclesResult.timeout && (
+              <Alert className="mb-4 border-border/40 shadow-none" variant="destructive">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <AlertDescription>
+                    Le calcul a pris trop de temps et a été arrêté. Les résultats ci-dessus sont partiels.
+                  </AlertDescription>
+                </div>
+              </Alert>
+            )}
             <div className="text-sm">
               <div className="mb-1 font-medium">
                 Total : {maxCirclesResult.totalCount} cercles

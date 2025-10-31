@@ -14,7 +14,6 @@ export function CircleCanvas({
   result,
   fabricWidth,
   fabricHeight,
-  gap,
 }: CircleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -128,7 +127,6 @@ export function MaxCirclesCanvas({
   result,
   fabricWidth,
   fabricHeight,
-  gap,
 }: MaxCirclesCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 

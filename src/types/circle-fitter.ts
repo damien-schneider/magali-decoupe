@@ -9,6 +9,7 @@ export type FitResult = {
   fits: boolean;
   circles: Circle[];
   suggestions?: Circle[];
+  timeout?: boolean;
 };
 
 export type MaxCirclesResult = {
@@ -19,6 +20,7 @@ export type MaxCirclesResult = {
     count: number;
     positions: { x: number; y: number }[];
   }[];
+  timeout?: boolean;
 };
 
 export type FabricDimensions = {
