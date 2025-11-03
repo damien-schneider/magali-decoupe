@@ -4,7 +4,7 @@ import { Calculator, Clock } from "lucide-react";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type {
   Circle,
   FabricDimensions,
@@ -20,6 +20,7 @@ type MaxCirclesCalculatorProps = {
   onResultChange: (result: MaxCirclesResult | null) => void;
   onFitResultChange?: (result: FitResult | null) => void;
   onCalculationComplete?: () => void;
+  onComputedDimensionsChange?: (dimensions: FabricDimensions) => void;
 };
 
 export function MaxCirclesCalculator({
@@ -29,6 +30,7 @@ export function MaxCirclesCalculator({
   onResultChange,
   onFitResultChange,
   onCalculationComplete,
+  onComputedDimensionsChange,
 }: MaxCirclesCalculatorProps) {
   const [isComputingMax, setIsComputingMax] = useState(false);
   const [maxCirclesResult, setMaxCirclesResult] =
@@ -36,15 +38,22 @@ export function MaxCirclesCalculator({
 
   const computeMaxCircles = () => {
     setIsComputingMax(true);
+    // Capture current dimensions for canvas to use
+    const computedDimensions = { ...dimensions };
+    onComputedDimensionsChange?.(computedDimensions);
+    
     // Use setTimeout to allow UI to update before heavy computation
     setTimeout(() => {
       // Run both calculations simultaneously
-      const maxResult = calculateMaxCirclesForAll(
-        dimensions.width,
-        dimensions.height,
-        circles,
-        dimensions.gap
-      );
+      const maxResult = calculateMaxCirclesForAll({
+        width: dimensions.width,
+        height: dimensions.height,
+        circlesToFit: circles,
+        gapSize: dimensions.gap,
+        options: {
+          attempts: 25, // Increase attempts for better chance of perfect distribution
+        },
+      });
       const fitResultValue = tryFitCircles(
         dimensions.width,
         dimensions.height,
@@ -61,14 +70,13 @@ export function MaxCirclesCalculator({
   };
 
   return (
-    <Card className="border-border/40 shadow-none">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <Calculator className="h-4 w-4" />
-          <CardTitle className="text-base">Cercles maximum</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Calculator className="h-4 w-4" />
+        <h3 className="font-medium text-base">Cercles maximum</h3>
+      </div>
+      <Separator className="my-2" />
+      <div className="space-y-3">
         <Button
           className="h-9 w-full shadow-none"
           disabled={isComputingMax || !isValidConfiguration}
@@ -98,7 +106,8 @@ export function MaxCirclesCalculator({
                 {dimensions.gap} cm d'espacement
               </div>
             </div>
-            <div className="space-y-2 border-t pt-1">
+            <Separator className="my-2" />
+            <div className="space-y-2">
               {maxCirclesResult.circlesByType.map((circleType, index) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: <>
                 <div className="flex items-center gap-2.5 text-sm" key={index}>
@@ -121,7 +130,7 @@ export function MaxCirclesCalculator({
             </div>
           </>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
 import type { Circle } from "@/types/circle-fitter";
@@ -36,11 +36,10 @@ export function CircleConfiguration({
   };
 
   return (
-    <Card className="border-border/40 shadow-none">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Diamètres des cercles</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2.5">
+    <div className="space-y-3">
+      <h3 className="font-medium text-base">Diamètres des cercles</h3>
+      <Separator className="my-2" />
+      <div className="space-y-2.5">
         {validationErrors.length > 0 && (
           <Alert className="mb-4 border-border/40 shadow-none" variant="destructive">
             <AlertDescription>
@@ -74,7 +73,7 @@ export function CircleConfiguration({
             <span className="text-muted-foreground text-sm">cm</span>
           </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
 import type { FabricDimensions } from "@/types/circle-fitter";
@@ -36,11 +36,10 @@ export function FabricDimensionsInput({
   };
 
   return (
-    <Card className="border-border/40 shadow-none">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Dimensions du tissu</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <div className="space-y-3">
+      <h3 className="font-medium text-base">Dimensions du tissu</h3>
+      <Separator className="my-2" />
+      <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label className="text-sm" htmlFor="width">
@@ -80,13 +79,14 @@ export function FabricDimensionsInput({
             value={dimensions.gap}
           />
         </div>
+        <Separator className="my-2" />
         <div className="pt-1 text-muted-foreground text-sm">
           Surface :{" "}
           <span className="font-medium font-mono">
             {(dimensions.width * dimensions.height).toFixed(0)} cm²
           </span>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

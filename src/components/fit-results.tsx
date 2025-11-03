@@ -4,7 +4,7 @@ import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { MaxCirclesCanvas } from "@/components/circle-canvas";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type {
   Circle,
   FabricDimensions,
@@ -20,6 +20,7 @@ type FitResultsProps = {
   showPreview: boolean;
   maxCirclesResult: MaxCirclesResult | null;
   dimensions: FabricDimensions;
+  computedDimensions?: FabricDimensions;
 };
 
 export function FitResults({
@@ -30,6 +31,7 @@ export function FitResults({
   showPreview,
   maxCirclesResult,
   dimensions,
+  computedDimensions,
 }: FitResultsProps) {
   const applySuggestions = () => {
     if (fitResult?.suggestions) {
@@ -86,7 +88,7 @@ export function FitResults({
 
           {/* Canvas Preview text above canvas */}
           <div className="text-center font-medium text-green-600 text-sm">
-            Canvas Preview: {maxCirclesResult.totalCount} circles calculated
+            Aperçu Canvas : {maxCirclesResult.totalCount} cercles calculés
           </div>
 
           {/* Full width canvas */}
@@ -96,17 +98,17 @@ export function FitResults({
               fabricWidth={dimensions.width}
               gap={dimensions.gap}
               result={maxCirclesResult}
+              computedDimensions={computedDimensions}
             />
           </div>
         </div>
       )}
 
       {fitResult && !fitResult.fits && fitResult.suggestions && (
-        <Card className="border-border/40 shadow-none">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Tailles suggérées</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2.5">
+        <div className="space-y-3">
+          <h3 className="font-medium text-base">Tailles suggérées</h3>
+          <Separator className="my-2" />
+          <div className="space-y-2.5">
             {fitResult.suggestions.map((suggestion, index) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: <>
               <div className="flex items-center gap-2.5 text-sm" key={index}>
@@ -128,15 +130,16 @@ export function FitResults({
                 )}
               </div>
             ))}
+            <Separator className="my-3" />
             <Button
-              className="mt-2 h-9 w-full bg-transparent shadow-none"
+              className="h-9 w-full bg-transparent shadow-none"
               onClick={applySuggestions}
               variant="outline"
             >
               Appliquer les suggestions
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </>
   );

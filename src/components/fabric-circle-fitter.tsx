@@ -18,6 +18,11 @@ export function FabricCircleFitter() {
     height: 250,
     gap: 5,
   });
+  const [computedDimensions, setComputedDimensions] = useState<FabricDimensions>({
+    width: 250,
+    height: 250,
+    gap: 5,
+  });
   const [circles, setCircles] = useState<Circle[]>([
     { diameter: 75, color: "oklch(0.5 0.08 240)" },
     { diameter: 60, color: "oklch(0.45 0.08 220)" },
@@ -29,6 +34,10 @@ export function FabricCircleFitter() {
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [fitResult, setFitResult] = useState<FitResult | null>(null);
   const [isValidConfiguration, setIsValidConfiguration] = useState<boolean>(true);
+
+  const handleComputedDimensionsChange = (dims: FabricDimensions) => {
+    setComputedDimensions(dims);
+  };
 
   const applySuggestions = (suggestions: Circle[]) => {
     setCircles(suggestions);
@@ -58,6 +67,7 @@ export function FabricCircleFitter() {
       <FitResults
         circles={circles}
         dimensions={dimensions}
+        computedDimensions={computedDimensions}
         fitResult={fitResult}
         gap={dimensions.gap}
         maxCirclesResult={maxCirclesResult}
@@ -72,6 +82,7 @@ export function FabricCircleFitter() {
         onCalculationComplete={() => setShowPreview(true)}
         onResultChange={setMaxCirclesResult}
         onFitResultChange={setFitResult}
+        onComputedDimensionsChange={handleComputedDimensionsChange}
       />
     </div>
   );
