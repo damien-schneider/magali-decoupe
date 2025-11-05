@@ -18,11 +18,12 @@ export function FabricCircleFitter() {
     height: 250,
     gap: 5,
   });
-  const [computedDimensions, setComputedDimensions] = useState<FabricDimensions>({
-    width: 250,
-    height: 250,
-    gap: 5,
-  });
+  const [computedDimensions, setComputedDimensions] =
+    useState<FabricDimensions>({
+      width: 250,
+      height: 250,
+      gap: 5,
+    });
   const [circles, setCircles] = useState<Circle[]>([
     { diameter: 75, color: "oklch(0.5 0.08 240)" },
     { diameter: 60, color: "oklch(0.45 0.08 220)" },
@@ -33,7 +34,8 @@ export function FabricCircleFitter() {
     useState<MaxCirclesResult | null>(null);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [fitResult, setFitResult] = useState<FitResult | null>(null);
-  const [isValidConfiguration, setIsValidConfiguration] = useState<boolean>(true);
+  const [isValidConfiguration, setIsValidConfiguration] =
+    useState<boolean>(true);
 
   const handleComputedDimensionsChange = (dims: FabricDimensions) => {
     setComputedDimensions(dims);
@@ -44,9 +46,9 @@ export function FabricCircleFitter() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="mx-auto max-w-3xl space-y-20 py-12">
       <div>
-        <h1 className="mt-8 mb-2 text-center font-bold text-3xl">
+        <h1 className="mt-8 mb-2 text-center font-semibold text-4xl tracking-tight">
           Magali Découpe
         </h1>
         <p className="mb-6 text-center text-muted-foreground text-sm">
@@ -66,8 +68,8 @@ export function FabricCircleFitter() {
 
       <FitResults
         circles={circles}
-        dimensions={dimensions}
         computedDimensions={computedDimensions}
+        dimensions={dimensions}
         fitResult={fitResult}
         gap={dimensions.gap}
         maxCirclesResult={maxCirclesResult}
@@ -80,9 +82,9 @@ export function FabricCircleFitter() {
         dimensions={dimensions}
         isValidConfiguration={isValidConfiguration}
         onCalculationComplete={() => setShowPreview(true)}
-        onResultChange={setMaxCirclesResult}
-        onFitResultChange={setFitResult}
         onComputedDimensionsChange={handleComputedDimensionsChange}
+        onFitResultChange={setFitResult}
+        onResultChange={setMaxCirclesResult}
       />
     </div>
   );

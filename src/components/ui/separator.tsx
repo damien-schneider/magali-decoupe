@@ -21,9 +21,9 @@ function Separator({
         orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
         className
       )}
-      role={decorative ? "none" : "separator"}
       data-orientation={orientation}
       data-slot="separator"
+      role={decorative ? "none" : "separator"}
       {...props}
     />
   );

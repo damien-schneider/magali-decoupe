@@ -1,8 +1,13 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
+import type { ChangeEvent } from "react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  NumberInputGroupInput,
+} from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
-import { NumberInput } from "@/components/ui/number-input";
+import { Separator } from "@/components/ui/separator";
 import type { FabricDimensions } from "@/types/circle-fitter";
 
 type FabricDimensionsInputProps = {
@@ -14,24 +19,27 @@ export function FabricDimensionsInput({
   dimensions,
   onDimensionsChange,
 }: FabricDimensionsInputProps) {
-  const handleWidthChange = (value: string) => {
+  const handleWidthChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const width = Number(e.target.value) || 0;
     onDimensionsChange({
       ...dimensions,
-      width: value === "" ? 0 : Number.parseFloat(value) || 0,
+      width,
     });
   };
 
-  const handleHeightChange = (value: string) => {
+  const handleHeightChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const height = Number(e.target.value) || 0;
     onDimensionsChange({
       ...dimensions,
-      height: value === "" ? 0 : Number.parseFloat(value) || 0,
+      height,
     });
   };
 
-  const handleGapChange = (value: string) => {
+  const handleGapChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const gap = Number(e.target.value) || 0;
     onDimensionsChange({
       ...dimensions,
-      gap: value === "" ? 0 : Number.parseFloat(value) || 0,
+      gap,
     });
   };
 
@@ -43,41 +51,52 @@ export function FabricDimensionsInput({
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label className="text-sm" htmlFor="width">
-              Largeur (cm)
+              Largeur
             </Label>
-            <NumberInput
-              className="font-mono shadow-none"
-              id="width"
-              min={1}
-              onChange={(e) => handleWidthChange(e.target.value)}
-              value={dimensions.width}
-            />
+            <InputGroup>
+              <NumberInputGroupInput
+                className="text-center font-mono"
+                id="width"
+                min={1}
+                onChange={(e) => handleWidthChange(e)}
+                step={0.1}
+                value={dimensions.width}
+              />
+              <InputGroupAddon align="inline-end">cm</InputGroupAddon>
+            </InputGroup>
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm" htmlFor="height">
-              Hauteur (cm)
+              Hauteur
             </Label>
-            <NumberInput
-              className="font-mono shadow-none"
-              id="height"
-              min={1}
-              onChange={(e) => handleHeightChange(e.target.value)}
-              value={dimensions.height}
-            />
+            <InputGroup>
+              <NumberInputGroupInput
+                className="text-center font-mono"
+                id="height"
+                min={1}
+                onChange={(e) => handleHeightChange(e)}
+                step={0.1}
+                value={dimensions.height}
+              />
+              <InputGroupAddon align="inline-end">cm</InputGroupAddon>
+            </InputGroup>
           </div>
         </div>
         <div className="space-y-1.5">
           <Label className="text-sm" htmlFor="gap">
-            Espacement (cm)
+            Espacement
           </Label>
-          <NumberInput
-            className="font-mono shadow-none"
-            id="gap"
-            min={0}
-            onChange={(e) => handleGapChange(e.target.value)}
-            step={1}
-            value={dimensions.gap}
-          />
+          <InputGroup>
+            <NumberInputGroupInput
+              className="text-center font-mono"
+              id="gap"
+              min={0}
+              onChange={(e) => handleGapChange(e)}
+              step={0.1}
+              value={dimensions.gap}
+            />
+            <InputGroupAddon align="inline-end">cm</InputGroupAddon>
+          </InputGroup>
         </div>
         <Separator className="my-2" />
         <div className="pt-1 text-muted-foreground text-sm">

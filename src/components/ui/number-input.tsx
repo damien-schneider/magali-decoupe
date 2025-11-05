@@ -1,26 +1,35 @@
 import { Minus, Plus } from "lucide-react";
 import {
   type ChangeEvent,
+  type ClipboardEvent,
   type ComponentProps,
   type FocusEvent,
+  type KeyboardEvent,
   useEffect,
   useState,
 } from "react";
 
 import { cn } from "@/lib/utils";
+import {
+  filterToAllowedCharacters,
+  validateNumberInput,
+} from "@/utils/input-filtering";
+
+// Define regex at module level for better performance
+const NUMBER_REGEX = /[0-9]/;
 
 interface NumberInputProps extends Omit<ComponentProps<"input">, "type"> {
   /**
-   * The step value for increment/decrement
+   * The step value for increment/decrement (supports decimal values)
    * @default 1
    */
   step?: number;
   /**
-   * Minimum value allowed
+   * Minimum value allowed (supports decimal values)
    */
   min?: number;
   /**
-   * Maximum value allowed
+   * Maximum value allowed (supports decimal values)
    */
   max?: number;
   /**
@@ -28,6 +37,11 @@ interface NumberInputProps extends Omit<ComponentProps<"input">, "type"> {
    * @default true
    */
   showButtons?: boolean;
+  /**
+   * Whether to allow negative numbers
+   * @default false
+   */
+  allowNegative?: boolean;
 }
 
 function NumberInput({
@@ -36,12 +50,25 @@ function NumberInput({
   min,
   max,
   showButtons = true,
+  allowNegative = false,
   value,
   defaultValue,
   onChange,
   ...props
 }: NumberInputProps) {
-  const [internalValue, setInternalValue] = useState<number>(() => {
+  // Store the actual user input string to preserve formatting (including commas)
+  const [displayValue, setDisplayValue] = useState<string>(() => {
+    if (typeof value === "number") {
+      return value.toString();
+    }
+    if (typeof defaultValue === "number") {
+      return defaultValue.toString();
+    }
+    return "";
+  });
+
+  // Store parsed numeric value for calculations
+  const [numericValue, setNumericValue] = useState<number>(() => {
     if (typeof value === "number") {
       return value;
     }
@@ -57,10 +84,11 @@ function NumberInput({
   // Track if the input is intentionally empty by user action
   const [isIntentionallyEmpty, setIsIntentionallyEmpty] = useState(false);
 
-  // Update internal value when controlled value changes
+  // Update display value when controlled value changes
   useEffect(() => {
     if (typeof value === "number") {
-      setInternalValue(value);
+      setDisplayValue(value.toString());
+      setNumericValue(value);
       setIsEmpty(false);
       // Only reset intentionally empty if the value is not 0
       // This preserves the empty state when parent sets value to 0 on blur
@@ -72,76 +100,166 @@ function NumberInput({
 
   const handleIncrement = () => {
     // Start from 0 if the input is empty
-    const currentValue = isEmpty ? 0 : internalValue;
+    const currentValue = isEmpty ? 0 : numericValue;
     const newValue = currentValue + step;
     if (max !== undefined && newValue > max) {
       return;
     }
 
     const clampedValue = max !== undefined ? Math.min(newValue, max) : newValue;
+    const clampedStringValue = clampedValue.toString();
 
     if (typeof value === "number") {
-      // Controlled component
+      // Controlled component - let parent handle the value update
       onChange?.({
-        target: { value: clampedValue.toString() } as HTMLInputElement,
+        target: { value: clampedStringValue } as HTMLInputElement,
       } as ChangeEvent<HTMLInputElement>);
     } else {
-      // Uncontrolled component
-      setInternalValue(clampedValue);
+      // Uncontrolled component - update internally
+      setDisplayValue(clampedStringValue);
+      setNumericValue(clampedValue);
       setIsEmpty(false);
+      setIsIntentionallyEmpty(false);
       onChange?.({
-        target: { value: clampedValue.toString() } as HTMLInputElement,
+        target: { value: clampedStringValue } as HTMLInputElement,
       } as ChangeEvent<HTMLInputElement>);
     }
   };
 
   const handleDecrement = () => {
     // Start from 0 if the input is empty
-    const currentValue = isEmpty ? 0 : internalValue;
+    const currentValue = isEmpty ? 0 : numericValue;
     const newValue = currentValue - step;
     if (min !== undefined && newValue < min) {
       return;
     }
 
     const clampedValue = min !== undefined ? Math.max(newValue, min) : newValue;
+    const clampedStringValue = clampedValue.toString();
 
     if (typeof value === "number") {
-      // Controlled component
+      // Controlled component - let parent handle the value update
       onChange?.({
-        target: { value: clampedValue.toString() } as HTMLInputElement,
+        target: { value: clampedStringValue } as HTMLInputElement,
       } as ChangeEvent<HTMLInputElement>);
     } else {
-      // Uncontrolled component
-      setInternalValue(clampedValue);
+      // Uncontrolled component - update internally
+      setDisplayValue(clampedStringValue);
+      setNumericValue(clampedValue);
       setIsEmpty(false);
+      setIsIntentionallyEmpty(false);
       onChange?.({
-        target: { value: clampedValue.toString() } as HTMLInputElement,
+        target: { value: clampedStringValue } as HTMLInputElement,
       } as ChangeEvent<HTMLInputElement>);
     }
+  };
+
+  // Strict input validation and filtering
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Allow control keys and navigation
+    if (e.ctrlKey || e.metaKey) {
+      return;
+    }
+
+    // Only allow numbers, decimal separators, minus sign, and control characters
+    const char = e.key;
+
+    // Check if character is allowed
+    const isNumber = NUMBER_REGEX.test(char);
+    const isDecimal = char === "." || char === ",";
+    const isNegative = allowNegative && char === "-";
+    const isControl =
+      char === "Backspace" ||
+      char === "Delete" ||
+      char === "Tab" ||
+      char === "ArrowLeft" ||
+      char === "ArrowRight" ||
+      char === "ArrowUp" ||
+      char === "ArrowDown" ||
+      char === "Home" ||
+      char === "End" ||
+      char === "Insert";
+
+    const allowed = isNumber || isDecimal || isNegative || isControl;
+
+    if (!allowed) {
+      e.preventDefault();
+    }
+  };
+
+  const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
+    const pastedData = e.clipboardData.getData("text");
+    const filteredData = filterToAllowedCharacters(pastedData, allowNegative);
+
+    if (filteredData !== pastedData) {
+      // Insert the filtered text at the cursor position
+      const input = e.currentTarget;
+      const start = input.selectionStart || 0;
+      const end = input.selectionEnd || 0;
+      const currentValue = input.value;
+
+      const newValue =
+        currentValue.substring(0, start) +
+        filteredData +
+        currentValue.substring(end);
+
+      setDisplayValue(newValue);
+
+      // Validate the new value
+      const validation = validateNumberInput(newValue, allowNegative);
+
+      if (validation.isValid) {
+        if (typeof value !== "number") {
+          setNumericValue(validation.numericValue || 0);
+          setIsEmpty(validation.numericValue === null);
+        }
+        setIsIntentionallyEmpty(validation.numericValue === null);
+
+        // Create and dispatch the change event
+        const newEvent: ChangeEvent<HTMLInputElement> = {
+          ...e,
+          target: {
+            ...e.target,
+            value: newValue,
+          },
+        };
+        onChange?.(newEvent);
+      }
+    }
+
+    e.preventDefault();
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
 
-    // Allow empty input or valid number
+    // Always update display value to preserve user input
+    setDisplayValue(inputValue);
+
+    // Allow empty input
     if (inputValue === "") {
       if (typeof value !== "number") {
         setIsEmpty(true);
       }
       setIsIntentionallyEmpty(true);
+      setNumericValue(0);
       onChange?.(e);
       return;
     }
 
-    const numValue = Number(inputValue.replace(/,/g, ""));
+    const validation = validateNumberInput(inputValue, allowNegative);
 
-    if (!Number.isNaN(numValue)) {
+    if (validation.isValid) {
       if (typeof value !== "number") {
-        setInternalValue(numValue);
-        setIsEmpty(false);
+        setNumericValue(validation.numericValue || 0);
+        setIsEmpty(validation.numericValue === null);
       }
-      setIsIntentionallyEmpty(false);
+      setIsIntentionallyEmpty(validation.numericValue === null);
       onChange?.(e);
+    } else {
+      // If invalid, we can choose to prevent the change or allow it to be filtered
+      // For strict filtering, we'll revert to the last valid value
+      setDisplayValue(displayValue);
     }
   };
 
@@ -158,7 +276,8 @@ function NumberInput({
         } as ChangeEvent<HTMLInputElement>);
       } else {
         // Uncontrolled component
-        setInternalValue(0);
+        setDisplayValue(zeroValue);
+        setNumericValue(0);
         setIsEmpty(false);
         setIsIntentionallyEmpty(false);
         onChange?.({
@@ -176,26 +295,24 @@ function NumberInput({
     }
   };
 
-  // Format number with commas for display
-  const formatNumber = (num: number) => num.toLocaleString();
-
-  let displayValue: string;
+  // Determine what value to display
+  let currentDisplayValue: string;
   if (typeof value === "number") {
     // For controlled components, show empty string if intentionally empty and value is 0
     if (isIntentionallyEmpty && value === 0) {
-      displayValue = "";
+      currentDisplayValue = "";
     } else {
-      displayValue = formatNumber(value);
+      currentDisplayValue = value.toString();
     }
   } else if (typeof value === "string") {
-    displayValue = value;
+    currentDisplayValue = value;
   } else {
     // For uncontrolled component, show empty string if isEmpty is true
-    displayValue = isEmpty ? "" : formatNumber(internalValue);
+    currentDisplayValue = isEmpty ? "" : displayValue;
   }
 
-  const isDecrementDisabled = min !== undefined && internalValue <= min;
-  const isIncrementDisabled = max !== undefined && internalValue >= max;
+  const isDecrementDisabled = min !== undefined && numericValue <= min;
+  const isIncrementDisabled = max !== undefined && numericValue >= max;
 
   return (
     <div
@@ -211,11 +328,13 @@ function NumberInput({
           "h-full w-full bg-transparent px-3 py-1 text-center tabular-nums outline-none placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
           showButtons ? "px-3" : "px-3"
         )}
-        inputMode="numeric"
+        inputMode="decimal"
         onBlur={handleInputBlur}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
         type="text"
-        value={displayValue}
+        value={currentDisplayValue}
         {...props}
       />
       {showButtons && (

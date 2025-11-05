@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { MaxCirclesCanvas } from "@/components/circle-canvas";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type {
@@ -72,33 +72,55 @@ export function FitResults({
                 <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
               )}
               <div className="flex-1">
-                <AlertDescription className="mb-0.5 font-medium text-sm">
+                <AlertTitle className="text-base text-muted-foreground">
                   {fitResult.fits
                     ? "Tous les cercles rentrent"
                     : "Les cercles ne rentrent pas"}
+                </AlertTitle>
+                <AlertDescription className="font-medium text-xs">
+                  Total : {maxCirclesResult.totalCount} cercles
                 </AlertDescription>
-                <AlertDescription className="text-xs">
-                  {fitResult.fits
-                    ? `Les quatre cercles rentrent avec ${gap} cm d'espacement.`
-                    : `Seulement ${fitResult.circles.length} cercle(s) sur 4 peuvent être placés.`}
+                <AlertDescription className="mb-2 text-muted-foreground text-xs">
+                  Dans {dimensions.width} × {dimensions.height} cm avec{" "}
+                  {dimensions.gap} cm d'espacement
                 </AlertDescription>
+                <Separator className="my-2" />
+                <div className="space-y-2">
+                  {maxCirclesResult.circlesByType.map((circleType, index) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <>
+                    <div
+                      className="flex items-center gap-2.5 text-sm"
+                      key={index}
+                    >
+                      <div
+                        className="h-4 w-4 shrink-0 rounded-full border"
+                        style={{
+                          backgroundColor: `${circleType.color}60`,
+                          borderColor: circleType.color,
+                        }}
+                      />
+                      <span className="min-w-[60px]">Cercle {index + 1} :</span>
+                      <span className="font-medium font-mono">
+                        {circleType.count}×
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        ({circleType.diameter} cm)
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </Alert>
           )}
 
-          {/* Canvas Preview text above canvas */}
-          <div className="text-center font-medium text-green-600 text-sm">
-            Aperçu Canvas : {maxCirclesResult.totalCount} cercles calculés
-          </div>
-
           {/* Full width canvas */}
-          <div className="w-full rounded bg-muted/30 p-3">
+          <div className="w-full">
             <MaxCirclesCanvas
+              computedDimensions={computedDimensions}
               fabricHeight={dimensions.height}
               fabricWidth={dimensions.width}
               gap={dimensions.gap}
               result={maxCirclesResult}
-              computedDimensions={computedDimensions}
             />
           </div>
         </div>

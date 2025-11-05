@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Ruler } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MaxCirclesResult } from "@/types/circle-fitter";
 
@@ -312,28 +313,27 @@ export function MaxCirclesCanvas({
   return (
     <div className="flex flex-col gap-4 lg:flex-row">
       {/* Canvas Preview */}
-      <div className="flex-1 rounded bg-muted/30 p-3">
-        <div className="flex h-full items-center justify-center">
-          <div className="relative flex items-center justify-center">
-            <canvas
-              className="rounded border border-border/40"
-              ref={canvasRef}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "500px",
-                aspectRatio: `${displayWidth} / ${displayHeight}`,
-              }}
-            />
-            {/* Dimensions label outside canvas */}
-            <div className="absolute bottom-2 left-2 rounded border border-border/40 bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs">
-              {displayWidth} × {displayHeight} cm
-            </div>
+
+      <div className="flex h-full flex-1 items-center justify-center">
+        <div className="relative flex items-center justify-center">
+          <canvas
+            className="rounded border border-border/40"
+            ref={canvasRef}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "500px",
+              aspectRatio: `${displayWidth} / ${displayHeight}`,
+            }}
+          />
+          {/* Dimensions label outside canvas */}
+          <div className="absolute bottom-2 left-2 rounded border border-border/40 bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs">
+            {displayWidth} × {displayHeight} cm
           </div>
         </div>
       </div>
 
       {/* Circle Details Panel */}
-      <div className="w-full rounded border border-border bg-background p-4 lg:w-80">
+      <div className="w-full rounded-xl border border-border bg-background p-4 lg:w-80">
         {displayedHoverInfo ? (
           <div className="space-y-2">
             <h3 className="mb-3 font-medium text-base text-foreground">
@@ -345,24 +345,47 @@ export function MaxCirclesCanvas({
                 {displayedHoverInfo.circleData.diameter.toFixed(1)} cm de
                 diamètre
               </div>
-              <div className="text-muted-foreground">
-                Rayon: {(displayedHoverInfo.circleData.diameter / 2).toFixed(1)}{" "}
-                cm
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Ruler className="h-4 w-4 text-purple-500" />
+                <span>Rayon:</span>
+                <span className="font-mono text-foreground">
+                  {(displayedHoverInfo.circleData.diameter / 2).toFixed(1)} cm
+                </span>
               </div>
               <div className="mt-3 font-medium text-muted-foreground">
                 Distance des bords:
               </div>
-              <div className="space-y-1 text-muted-foreground text-xs">
-                <div>Haut: {displayedHoverInfo.position.y.toFixed(1)} cm</div>
-                <div>
-                  Droite:{" "}
-                  {(fabricWidth - displayedHoverInfo.position.x).toFixed(1)} cm
+              <div className="space-y-2 text-muted-foreground text-xs">
+                <div className="flex items-center gap-2">
+                  <ArrowUp className="h-3 w-3 text-blue-500" />
+                  <span className="font-medium">Haut:</span>
+                  <span className="font-mono text-foreground">
+                    {displayedHoverInfo.position.y.toFixed(1)} cm
+                  </span>
                 </div>
-                <div>
-                  Bas:{" "}
-                  {(fabricHeight - displayedHoverInfo.position.y).toFixed(1)} cm
+                <div className="flex items-center gap-2">
+                  <ArrowRight className="h-3 w-3 text-green-500" />
+                  <span className="font-medium">Droite:</span>
+                  <span className="font-mono text-foreground">
+                    {(fabricWidth - displayedHoverInfo.position.x).toFixed(1)}{" "}
+                    cm
+                  </span>
                 </div>
-                <div>Gauche: {displayedHoverInfo.position.x.toFixed(1)} cm</div>
+                <div className="flex items-center gap-2">
+                  <ArrowDown className="h-3 w-3 text-red-500" />
+                  <span className="font-medium">Bas:</span>
+                  <span className="font-mono text-foreground">
+                    {(fabricHeight - displayedHoverInfo.position.y).toFixed(1)}{" "}
+                    cm
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ArrowLeft className="h-3 w-3 text-orange-500" />
+                  <span className="font-medium">Gauche:</span>
+                  <span className="font-mono text-foreground">
+                    {displayedHoverInfo.position.x.toFixed(1)} cm
+                  </span>
+                </div>
               </div>
             </div>
           </div>

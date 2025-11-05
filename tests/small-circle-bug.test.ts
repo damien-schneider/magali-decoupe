@@ -1,19 +1,19 @@
-import { describe, it, expect } from 'vitest';
-import { calculateMaxCirclesForAll } from '../src/utils/circle-fitting';
-import type { Circle } from '../src/types/circle-fitter';
+import { describe, expect, it } from "vitest";
+import type { Circle } from "../src/types/circle-fitter";
+import { calculateMaxCirclesForAll } from "../src/utils/circle-fitting";
 
-describe('Small Circle Bug Reproduction', () => {
-  it('should reproduce the small circle bug (10cm circle outputs 0)', () => {
+describe("Small Circle Bug Reproduction", () => {
+  it("should reproduce the small circle bug (10cm circle outputs 0)", () => {
     // Test case that should work but currently outputs 0 circles
     const width = 250;
     const height = 250;
     const gapSize = 5;
 
     const circles: Circle[] = [
-      { diameter: 10, color: '#ff6b6b' },    // Small circle - this might be the issue
-      { diameter: 60, color: '#4ecdc4' },   
-      { diameter: 50, color: '#45b7d1' },   
-      { diameter: 40, color: '#96ceb4' },   
+      { diameter: 10, color: "#ff6b6b" }, // Small circle - this might be the issue
+      { diameter: 60, color: "#4ecdc4" },
+      { diameter: 50, color: "#45b7d1" },
+      { diameter: 40, color: "#96ceb4" },
     ];
 
     const result = calculateMaxCirclesForAll({
@@ -30,7 +30,7 @@ describe('Small Circle Bug Reproduction', () => {
     expect(result.totalCount).toBeGreaterThan(0);
   });
 
-  it('should isolate the problem with just 10cm circle', () => {
+  it("should isolate the problem with just 10cm circle", () => {
     const width = 250;
     const height = 250;
     const gapSize = 5;
@@ -38,7 +38,7 @@ describe('Small Circle Bug Reproduction', () => {
     const result = calculateMaxCirclesForAll({
       width,
       height,
-      circlesToFit: [{ diameter: 10, color: '#ff6b6b' }],
+      circlesToFit: [{ diameter: 10, color: "#ff6b6b" }],
       gapSize,
       options: { attempts: 5 },
     });
@@ -47,7 +47,7 @@ describe('Small Circle Bug Reproduction', () => {
     expect(result.totalCount).toBeGreaterThan(0);
   });
 
-  it('should work with slightly larger circles', () => {
+  it("should work with slightly larger circles", () => {
     const width = 250;
     const height = 250;
     const gapSize = 5;
@@ -55,7 +55,7 @@ describe('Small Circle Bug Reproduction', () => {
     const result = calculateMaxCirclesForAll({
       width,
       height,
-      circlesToFit: [{ diameter: 15, color: '#ff6b6b' }],
+      circlesToFit: [{ diameter: 15, color: "#ff6b6b" }],
       gapSize,
       options: { attempts: 5 },
     });
