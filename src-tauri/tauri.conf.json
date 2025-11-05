@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "magali-decoupe",
-  "version": "0.1.0",
+  "productName": "Magali Découpe",
+  "version": "0.2.1",
   "identifier": "com.damienschneider.magali-decoupe",
   "build": {
     "beforeDevCommand": "bun run dev",
@@ -12,9 +12,12 @@
   "app": {
     "windows": [
       {
-        "title": "magali-decoupe",
-        "width": 800,
-        "height": 600
+        "title": "Magali Découpe - Circle Fitter",
+        "width": 1000,
+        "height": 700,
+        "resizable": true,
+        "minWidth": 800,
+        "minHeight": 600
       }
     ],
     "security": {
@@ -24,12 +27,24 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "publisher": "Damien Schneider",
     "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ]
+      "../public/magali-decoupe-icons/web/icon-192.png",
+      "../public/magali-decoupe-icons/web/icon-512.png",
+      "../public/magali-decoupe-icons/web/icon-512.png",
+      "../public/magali-decoupe-icons/ios/AppIcon@2x.png",
+      "../public/magali-decoupe-icons/web/favicon.ico"
+    ],
+    "resources": [],
+    "externalBin": [],
+    "copyright": "© 2024 Damien Schneider. All rights reserved.",
+    "category": "DeveloperTool",
+    "shortDescription": "Advanced circle fitting tool for optimal material cutting",
+    "longDescription": "Magali Découpe is a professional circle fitting application designed to help you calculate the optimal arrangement of circles on rectangular materials. Perfect for cutting circles from fabric, wood, metal, or any rectangular material while minimizing waste.",
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    }
   }
 }

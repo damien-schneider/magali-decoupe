@@ -46,13 +46,40 @@ export function FabricCircleFitter() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-20 py-12">
-      <div>
-        <h1 className="mt-8 mb-2 text-center font-semibold text-4xl tracking-tight">
-          Magali Découpe
-        </h1>
-        <p className="mb-6 text-center text-muted-foreground text-sm">
-          Calculateur d&apos;agencement de cercles sur tissu
+    <div className="mx-auto max-w-3xl space-y-20 px-4 py-12">
+      {/* Brand Header */}
+      <div className="space-y-6 text-center">
+        <div className="mb-6 flex items-center justify-center">
+          <div className="mr-4 flex h-16 w-16 items-center justify-center rounded-xl bg-primary shadow-lg">
+            <svg
+              aria-label="Magali Découpe Logo"
+              className="text-primary-foreground"
+              fill="none"
+              height="32"
+              viewBox="0 0 32 32"
+              width="32"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <title>Magali Découpe Logo</title>
+              <circle cx="16" cy="16" fill="currentColor" r="12" />
+              <circle cx="16" cy="16" fill="var(--background)" r="8" />
+              <path
+                d="M8 16a8 8 0 1 1 16 0v2h-2v-2a6 6 0 1 0-12 0v2H8v-2z"
+                fill="currentColor"
+              />
+            </svg>
+          </div>
+          <h1 className="font-bold text-4xl text-foreground tracking-tight">
+            Magali Découpe
+          </h1>
+        </div>
+        <p className="mx-auto max-w-2xl font-medium text-lg text-muted-foreground">
+          Calculateur d'agencement de cercles sur tissu
+        </p>
+        <div className="mx-auto h-1 w-24 rounded-full bg-gradient-to-r from-primary via-accent to-primary" />
+        <p className="text-muted-foreground/80 text-sm">
+          Optimisez vos découpes de tissu • Minimisez le gaspillage • Maximisez
+          l'efficacité
         </p>
       </div>
       <FabricDimensionsInput

@@ -1,7 +1,7 @@
 {
   "name": "magali-decoupe",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,8 +14,8 @@
     "build:all": "bun run build:macos && bun run build:windows",
     "build:macos": "bun run build:prepare && bun tauri build --bundles dmg && bun run build:organize",
     "build:windows": "bun run build:prepare && bun tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc && bun run build:organize",
-    "build:prepare": "mkdir -p builds",
-    "build:organize": "node -e \"const fs=require('fs'); const path=require('path'); const exists=dir=>fs.existsSync(dir); const copyDir=(src,dest)=>{if(exists(src)&&!exists(dest))fs.cpSync(src,dest,{recursive:true});}; copyDir('src-tauri/target/release/bundle/dmg','builds/macos/dmg'); copyDir('src-tauri/target/release/bundle/macos','builds/macos/app'); copyDir('src-tauri/target/release/bundle/msi','builds/windows-msi'); copyDir('src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis','builds/windows-nsis'); copyDir('src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi','builds/windows-msi'); copyDir('src-tauri/target/release/bundle/deb','builds/linux-deb'); copyDir('src-tauri/target/release/bundle/appimage','builds/linux-appimage');\"",
+    "build:prepare": "rm -rf builds && mkdir -p builds",
+    "build:organize": "node -e \"const fs=require('fs'); const path=require('path'); const copyDir=(src,dest)=>{if(fs.existsSync(src)){if(fs.existsSync(dest)){fs.rmSync(dest,{recursive:true,force:true});}fs.mkdirSync(dest,{recursive:true});fs.cpSync(src,dest,{recursive:true});}}; copyDir('src-tauri/target/release/bundle/dmg','builds/macos/dmg'); copyDir('src-tauri/target/release/bundle/macos','builds/macos/app'); copyDir('src-tauri/target/release/bundle/msi','builds/windows-msi'); copyDir('src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis','builds/windows-nsis'); copyDir('src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi','builds/windows-msi'); copyDir('src-tauri/target/release/bundle/deb','builds/linux-deb'); copyDir('src-tauri/target/release/bundle/appimage','builds/linux-appimage');\"",
     "build:clean": "rm -rf builds && bun run build:prepare"
   },
   "dependencies": {
@@ -48,6 +48,5 @@
     "ultracite": "6.0.4",
     "vite": "^7.0.4",
     "vitest": "^4.0.6"
-  },
-  "packageManager": "pnpm@10.19.0+sha512.c9fc7236e92adf5c8af42fd5bf1612df99c2ceb62f27047032f4720b33f8eacdde311865e91c411f2774f618d82f320808ecb51718bfa82c060c4ba7c76a32b8"
+  }
 }

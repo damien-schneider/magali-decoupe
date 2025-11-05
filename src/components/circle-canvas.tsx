@@ -225,7 +225,6 @@ export function MaxCirclesCanvas({
         return;
       }
 
-      const devicePixelRatio = window.devicePixelRatio || 1;
       const maxCanvasWidth = 600;
       const maxCanvasHeight = 400;
 
@@ -239,16 +238,13 @@ export function MaxCirclesCanvas({
       const canvasWidth = displayWidth * scale;
       const canvasHeight = displayHeight * scale;
 
-      // Set canvas size with device pixel ratio
-      canvas.width = canvasWidth * devicePixelRatio;
-      canvas.height = canvasHeight * devicePixelRatio;
+      // Set canvas internal size (actual drawing buffer)
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
 
-      // Set display size
+      // Set display size (CSS pixels) - same as internal size to prevent stretching
       canvas.style.width = `${canvasWidth}px`;
       canvas.style.height = `${canvasHeight}px`;
-
-      // Scale the context for high DPI displays
-      ctx.scale(devicePixelRatio, devicePixelRatio);
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -311,44 +307,43 @@ export function MaxCirclesCanvas({
   }, [handleMouseMove, handleMouseLeave]);
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row">
+    <div className="grid grid-cols-1 gap-6">
       {/* Canvas Preview */}
-
-      <div className="flex h-full flex-1 items-center justify-center">
-        <div className="relative flex items-center justify-center">
+      <div className="flex flex-col items-center">
+        <div className="relative flex w-full max-w-[600px] items-center justify-center">
           <canvas
-            className="rounded border border-border/40"
             ref={canvasRef}
             style={{
-              maxWidth: "100%",
-              maxHeight: "500px",
-              aspectRatio: `${displayWidth} / ${displayHeight}`,
+              width: "100%",
+              height: "auto",
+              // maxWidth: "600px",
+              // maxHeight: "500px",
             }}
           />
           {/* Dimensions label outside canvas */}
-          <div className="absolute bottom-2 left-2 rounded border border-border/40 bg-background/90 px-2 py-1 font-mono text-muted-foreground text-xs">
+          <div className="-bottom-8 absolute left-0 rounded-full border bg-card px-2 py-1 text-muted-foreground text-xs">
             {displayWidth} × {displayHeight} cm
           </div>
         </div>
       </div>
 
       {/* Circle Details Panel */}
-      <div className="w-full rounded-xl border border-border bg-background p-4 lg:w-80">
+      <div className="w-full rounded-lg border bg-card p-4">
         {displayedHoverInfo ? (
           <div className="space-y-2">
             <h3 className="mb-3 font-medium text-base text-foreground">
               Détails du cercle
             </h3>
             <div className="space-y-1 text-sm">
-              <div className="font-medium text-foreground">
+              <div className="wrap-break-words font-medium text-foreground">
                 Cercle #{displayedHoverInfo.circleIndex}:{" "}
                 {displayedHoverInfo.circleData.diameter.toFixed(1)} cm de
                 diamètre
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Ruler className="h-4 w-4 text-purple-500" />
+                <Ruler className="h-4 w-4 shrink-0 text-purple-500" />
                 <span>Rayon:</span>
-                <span className="font-mono text-foreground">
+                <span className="shrink-0 font-mono text-foreground">
                   {(displayedHoverInfo.circleData.diameter / 2).toFixed(1)} cm
                 </span>
               </div>
@@ -357,32 +352,32 @@ export function MaxCirclesCanvas({
               </div>
               <div className="space-y-2 text-muted-foreground text-xs">
                 <div className="flex items-center gap-2">
-                  <ArrowUp className="h-3 w-3 text-blue-500" />
-                  <span className="font-medium">Haut:</span>
-                  <span className="font-mono text-foreground">
+                  <ArrowUp className="h-3 w-3 shrink-0 text-blue-500" />
+                  <span className="shrink-0 font-medium">Haut:</span>
+                  <span className="shrink-0 font-mono text-foreground">
                     {displayedHoverInfo.position.y.toFixed(1)} cm
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ArrowRight className="h-3 w-3 text-green-500" />
-                  <span className="font-medium">Droite:</span>
-                  <span className="font-mono text-foreground">
+                  <ArrowRight className="h-3 w-3 shrink-0 text-green-500" />
+                  <span className="shrink-0 font-medium">Droite:</span>
+                  <span className="shrink-0 font-mono text-foreground">
                     {(fabricWidth - displayedHoverInfo.position.x).toFixed(1)}{" "}
                     cm
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ArrowDown className="h-3 w-3 text-red-500" />
-                  <span className="font-medium">Bas:</span>
-                  <span className="font-mono text-foreground">
+                  <ArrowDown className="h-3 w-3 shrink-0 text-red-500" />
+                  <span className="shrink-0 font-medium">Bas:</span>
+                  <span className="shrink-0 font-mono text-foreground">
                     {(fabricHeight - displayedHoverInfo.position.y).toFixed(1)}{" "}
                     cm
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ArrowLeft className="h-3 w-3 text-orange-500" />
-                  <span className="font-medium">Gauche:</span>
-                  <span className="font-mono text-foreground">
+                  <ArrowLeft className="h-3 w-3 shrink-0 text-orange-500" />
+                  <span className="shrink-0 font-medium">Gauche:</span>
+                  <span className="shrink-0 font-mono text-foreground">
                     {displayedHoverInfo.position.x.toFixed(1)} cm
                   </span>
                 </div>

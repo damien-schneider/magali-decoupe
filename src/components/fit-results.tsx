@@ -26,7 +26,6 @@ type FitResultsProps = {
 export function FitResults({
   fitResult,
   circles,
-  gap,
   onApplySuggestions,
   showPreview,
   maxCirclesResult,
@@ -62,22 +61,19 @@ export function FitResults({
         <div className="space-y-3">
           {/* Alert title above preview */}
           {fitResult && (
-            <Alert
-              className="border-border/40 shadow-none"
-              variant={fitResult.fits ? "default" : "destructive"}
-            >
+            <Alert variant={fitResult.fits ? "default" : "destructive"}>
               {fitResult.fits ? (
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
               ) : (
                 <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
               )}
               <div className="flex-1">
-                <AlertTitle className="text-base text-muted-foreground">
+                <AlertTitle>
                   {fitResult.fits
                     ? "Tous les cercles rentrent"
                     : "Les cercles ne rentrent pas"}
                 </AlertTitle>
-                <AlertDescription className="font-medium text-xs">
+                <AlertDescription>
                   Total : {maxCirclesResult.totalCount} cercles
                 </AlertDescription>
                 <AlertDescription className="mb-2 text-muted-foreground text-xs">
@@ -87,9 +83,9 @@ export function FitResults({
                 <Separator className="my-2" />
                 <div className="space-y-2">
                   {maxCirclesResult.circlesByType.map((circleType, index) => (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: <>
                     <div
                       className="flex items-center gap-2.5 text-sm"
+                      // biome-ignore lint/suspicious/noArrayIndexKey: <>
                       key={index}
                     >
                       <div

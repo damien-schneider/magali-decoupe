@@ -216,10 +216,11 @@ function NumberInput({
         setIsIntentionallyEmpty(validation.numericValue === null);
 
         // Create and dispatch the change event
+        const inputElement = e.currentTarget;
         const newEvent: ChangeEvent<HTMLInputElement> = {
           ...e,
           target: {
-            ...e.target,
+            ...inputElement,
             value: newValue,
           },
         };

@@ -9,7 +9,6 @@ import {
   NumberInputGroupInput,
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { validateCircles } from "@/lib/validation";
 import type { Circle } from "@/types/circle-fitter";
 
@@ -45,8 +44,9 @@ export function CircleConfiguration({
 
   return (
     <div className="space-y-3">
-      <h3 className="font-medium text-base">Diamètres des cercles</h3>
-      <Separator className="my-2" />
+      <h3 className="mb-4 font-medium text-xl tracking-tight">
+        Diamètres des cercles
+      </h3>
       <div className="space-y-2.5">
         {validationErrors.length > 0 && (
           <Alert
